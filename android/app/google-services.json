@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "950673729343",
+    "firebase_url": "https://hub-rpg-5f3e2-default-rtdb.firebaseio.com",
+    "project_id": "hub-rpg-5f3e2",
+    "storage_bucket": "hub-rpg-5f3e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950673729343:android:5aa896c4e6ed03b804d58a",
+        "android_client_info": {
+          "package_name": "com.limboos.limbo_os"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "950673729343-00nblovdg64nqppkdmn3cffek3vvq3pr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxPk9LsnkEzAmRayUWZ6uaBJ6TbGoDFGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "950673729343-00nblovdg64nqppkdmn3cffek3vvq3pr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "950673729343-bl1mpdkvduca269mgfsfk4g3q75jqlgs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xinous.runningman"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950673729343:android:81f7876db0a6509404d58a",
+        "android_client_info": {
+          "package_name": "com.xinous.runningman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "950673729343-00nblovdg64nqppkdmn3cffek3vvq3pr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxPk9LsnkEzAmRayUWZ6uaBJ6TbGoDFGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "950673729343-00nblovdg64nqppkdmn3cffek3vvq3pr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "950673729343-bl1mpdkvduca269mgfsfk4g3q75jqlgs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xinous.runningman"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
