@@ -35,6 +35,11 @@ dependencies:
   flutter_lucide: ^1.1.0
   font_awesome_flutter: ^10.8.0
 
+  # Nokia Player Dependencies
+  just_audio: ^0.9.42
+  mobile_scanner: ^6.0.0
+  battery_plus: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

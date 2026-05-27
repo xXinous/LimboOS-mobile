@@ -78,7 +78,7 @@ class AuthRepository {
   }
 
   Future<MasterAccount> _getOrCreateMasterAccount(User user, {String? masterId}) async {
-    final doc = await _firestore.collection('master_accounts').doc(user.uid).get();
+    final doc = await _firestore.collection('users').doc(user.uid).get();
     
     if (!doc.exists) {
       final account = MasterAccount(
@@ -90,10 +90,10 @@ class AuthRepository {
         createdAt: DateTime.now(),
         lastLogin: DateTime.now(),
       );
-      await _firestore.collection('master_accounts').doc(user.uid).set(account.toFirestore());
+      await _firestore.collection('users').doc(user.uid).set(account.toFirestore());
       return account;
     } else {
-      await _firestore.collection('master_accounts').doc(user.uid).update({
+      await _firestore.collection('users').doc(user.uid).update({
         'lastLogin': FieldValue.serverTimestamp(),
       });
       return MasterAccount.fromFirestore(doc);
@@ -114,4 +114,16 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
 @riverpod
 Stream<User?> authStateChanges(AuthStateChangesRef ref) {
   return ref.watch(authRepositoryProvider).authStateChanges();
+}
+
+@riverpod
+Stream<MasterAccount?> currentMasterAccount(CurrentMasterAccountRef ref) {
+  final user = ref.watch(authStateChangesProvider).value;
+  if (user == null) return Stream.value(null);
+  
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map((doc) => doc.exists ? MasterAccount.fromFirestore(doc) : null);
 }

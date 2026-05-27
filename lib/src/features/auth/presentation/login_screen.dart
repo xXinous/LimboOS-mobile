@@ -162,6 +162,17 @@ class LoginScreen extends HookConsumerWidget {
                         icon: const Icon(Icons.chevron_right, size: 18),
                       ),
 
+                      const SizedBox(height: 12),
+                      Text(
+                        'AVISO: O PAINEL DE ADMINISTRAÇÃO ESTÁ DISPONÍVEL EXCLUSIVAMENTE NA VERSÃO WEB.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontSize: 7,
+                          letterSpacing: 1,
+                          color: RetroTheme.kIndustrialSilver.withValues(alpha: 0.5),
+                        ),
+                      ),
+
                       const SizedBox(height: 24),
                       
                       // Social Login Divider
