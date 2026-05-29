@@ -50,106 +50,150 @@ class NokiaBottomNav extends ConsumerWidget {
                 onBack();
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF111E14), width: 1),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('[<]', style: textStyle),
-                    const SizedBox(width: 4),
-                    Text('VOLTAR', style: textStyle),
-                  ],
-                ),
-              ),
-            )
-          else
-            const Opacity(
-              opacity: 0,
-              child: IgnorePointer(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('VOLTAR'),
-                ),
-              ),
-            ),
-
-          // Home/Inicio Button
-          GestureDetector(
-            onTap: () {
-              _triggerHaptic();
-              ref.read(nokiaScreenStateProvider.notifier).setScreen(NokiaScreen.player);
-            },
-            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF111E14), width: 1),
-                borderRadius: BorderRadius.circular(3),
-                color: activeScreen == NokiaScreen.player
-                    ? const Color(0xFF111E14).withValues(alpha: 0.1)
-                    : null,
+                color: const Color(0xFFEDFEED),
+                border: Border.all(color: const Color(0xFF111E14), width: 1.5),
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0xFF111E14),
+                    offset: Offset(1, 1),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('[*]', style: textStyle),
-                  const SizedBox(width: 2),
-                  Text('INICIO', style: textStyle),
+                  Text('[<]', style: textStyle),
+                  const SizedBox(width: 4),
+                  Text('VOLTAR', style: textStyle),
                 ],
+              ),
+            ),
+          )
+        else
+          const Opacity(
+            opacity: 0,
+            child: IgnorePointer(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Text('VOLTAR'),
               ),
             ),
           ),
 
-          // Mute Button
-          GestureDetector(
-            onTap: () {
-              _triggerHaptic();
-              ref.read(nokiaMuteProvider.notifier).toggle();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF111E14), width: 1),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(isMuted ? '[X]' : '[~]', style: textStyle),
-                  const SizedBox(width: 2),
-                  Text(isMuted ? 'MUDO' : 'SOM', style: textStyle),
-                ],
-              ),
+        // Home/Inicio Button
+        GestureDetector(
+          onTap: () {
+            _triggerHaptic();
+            ref.read(nokiaScreenStateProvider.notifier).setScreen(NokiaScreen.player);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: activeScreen == NokiaScreen.player
+                  ? const Color(0xFF111E14)
+                  : const Color(0xFFEDFEED),
+              border: Border.all(color: const Color(0xFF111E14), width: 1.5),
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                if (activeScreen != NokiaScreen.player)
+                  const BoxShadow(
+                    color: Color(0xFF111E14),
+                    offset: Offset(1, 1),
+                  ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('[*]',
+                    style: textStyle.copyWith(
+                        color: activeScreen == NokiaScreen.player
+                            ? const Color(0xFFEDFEED)
+                            : const Color(0xFF111E14))),
+                const SizedBox(width: 2),
+                Text('INICIO',
+                    style: textStyle.copyWith(
+                        color: activeScreen == NokiaScreen.player
+                            ? const Color(0xFFEDFEED)
+                            : const Color(0xFF111E14))),
+              ],
             ),
           ),
+        ),
 
-          // Dossier Button
-          GestureDetector(
-            onTap: () {
-              _triggerHaptic();
-              onProfileOpen();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF111E14), width: 1),
-                borderRadius: BorderRadius.circular(3),
-                color: activeScreen == NokiaScreen.profile
-                    ? const Color(0xFF111E14).withValues(alpha: 0.1)
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('[#]', style: textStyle),
-                  const SizedBox(width: 2),
-                  Text('DOSSIE', style: textStyle),
-                ],
-              ),
+        // Mute Button
+        GestureDetector(
+          onTap: () {
+            _triggerHaptic();
+            ref.read(nokiaMuteProvider.notifier).toggle();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEDFEED),
+              border: Border.all(color: const Color(0xFF111E14), width: 1.5),
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF111E14),
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(isMuted ? '[X]' : '[~]', style: textStyle),
+                const SizedBox(width: 2),
+                Text(isMuted ? 'MUDO' : 'SOM', style: textStyle),
+              ],
             ),
           ),
+        ),
+
+        // Dossier Button
+        GestureDetector(
+          onTap: () {
+            _triggerHaptic();
+            onProfileOpen();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: activeScreen == NokiaScreen.profile
+                  ? const Color(0xFF111E14)
+                  : const Color(0xFFEDFEED),
+              border: Border.all(color: const Color(0xFF111E14), width: 1.5),
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                if (activeScreen != NokiaScreen.profile)
+                  const BoxShadow(
+                    color: Color(0xFF111E14),
+                    offset: Offset(1, 1),
+                  ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('[#]',
+                    style: textStyle.copyWith(
+                        color: activeScreen == NokiaScreen.profile
+                            ? const Color(0xFFEDFEED)
+                            : const Color(0xFF111E14))),
+                const SizedBox(width: 2),
+                Text('DOSSIE',
+                    style: textStyle.copyWith(
+                        color: activeScreen == NokiaScreen.profile
+                            ? const Color(0xFFEDFEED)
+                            : const Color(0xFF111E14))),
+              ],
+            ),
+          ),
+        ),
         ],
       ),
     );

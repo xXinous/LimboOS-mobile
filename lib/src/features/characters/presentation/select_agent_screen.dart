@@ -29,36 +29,47 @@ class SelectAgentScreen extends ConsumerWidget {
               // Header
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(left: 16),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(color: RetroTheme.kPrimary, width: 4),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.only(left: 16),
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(color: RetroTheme.kPrimary, width: 4),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'SELECIONAR AGENTE',
+                                    style: Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  Text(
+                                    'CREDENCIAIS ATIVAS PARA: ${user.email?.toUpperCase()}',
+                                    style: Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                ],
+                              ),
+                            ).animate().fadeIn().slideX(begin: -0.1),
+                            const SizedBox(width: 16), // Espaço mínimo garantido
+                            IconButton(
+                              onPressed: () => ref.read(authRepositoryProvider).signOut(),
+                              icon: const Icon(LucideIcons.log_out, color: RetroTheme.kIndustrialSilver),
+                              tooltip: 'Sair do Sistema',
+                            ),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'SELECIONAR AGENTE',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          Text(
-                            'CREDENCIAIS ATIVAS PARA: ${user.email?.toUpperCase()}',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
-                    ).animate().fadeIn().slideX(begin: -0.1),
-                    IconButton(
-                      onPressed: () => ref.read(authRepositoryProvider).signOut(),
-                      icon: const Icon(LucideIcons.log_out, color: RetroTheme.kIndustrialSilver),
-                      tooltip: 'Sair do Sistema',
-                    ),
-                  ],
+                    );
+                  }
                 ),
               ),
 

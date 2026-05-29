@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/intel_item.dart';
@@ -36,7 +37,7 @@ class IntelRepository {
         return data?['targetId'] as String?;
       }
     } catch (e) {
-      print('Error resolving QR code redirect: $e');
+      developer.log('Error resolving QR code redirect: $e', error: e);
     }
     return null;
   }

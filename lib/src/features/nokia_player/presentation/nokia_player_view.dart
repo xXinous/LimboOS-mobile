@@ -8,6 +8,117 @@ import '../domain/intel_item.dart';
 import '../data/nokia_providers.dart';
 import '../data/audio_engine_service.dart';
 
+/* ─── PIXEL ART WIDGET ─── */
+class PixelIcon extends StatelessWidget {
+  final List<String> matrix;
+  final double pixelSize;
+  final Color color;
+
+  const PixelIcon({
+    super.key,
+    required this.matrix,
+    this.pixelSize = 1.5,
+    this.color = const Color(0xFF111E14),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: matrix.map((row) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: row.split('').map((pixel) {
+            return Container(
+              width: pixelSize,
+              height: pixelSize,
+              color: pixel == 'X' ? color : Colors.transparent,
+            );
+          }).toList(),
+        );
+      }).toList(),
+    );
+  }
+
+  // Predefined Icons
+  static const List<String> play = [
+    'X       ',
+    'XX      ',
+    'XXX     ',
+    'XXXX    ',
+    'XXXXX   ',
+    'XXXX    ',
+    'XXX     ',
+    'XX      ',
+    'X       ',
+  ];
+
+  static const List<String> pause = [
+    'XXX XXX',
+    'XXX XXX',
+    'XXX XXX',
+    'XXX XXX',
+    'XXX XXX',
+    'XXX XXX',
+    'XXX XXX',
+  ];
+
+  static const List<String> rewind = [
+    '  X  XX',
+    ' XX  XX',
+    'XXX  XX',
+    ' XX  XX',
+    '  X  XX',
+  ];
+
+  static const List<String> close = [
+    'X   X',
+    ' X X ',
+    '  X  ',
+    ' X X ',
+    'X   X',
+  ];
+
+  static const List<String> volume = [
+    '  X  ',
+    ' XX  ',
+    'XXXXX',
+    ' XX  ',
+    '  X  ',
+  ];
+
+  static const List<String> audio = [
+    '  X  ',
+    ' XXX ',
+    'XXXXX',
+    ' XXX ',
+    '  X  ',
+  ];
+
+  static const List<String> doc = [
+    'XXXXX ',
+    'X   XX',
+    'X    X',
+    'X    X',
+    'XXXXXX',
+  ];
+
+  static const List<String> sms = [
+    'XXXXXX',
+    'X    X',
+    'X XX X',
+    'X    X',
+    'XXXXXX',
+  ];
+
+  static const List<String> camera = [
+    '  XXX  ',
+    'XXXXXXX',
+    'XX X XX',
+    'XXXXXXX',
+  ];
+}
+
 class NokiaPlayerView extends ConsumerStatefulWidget {
   const NokiaPlayerView({super.key});
 
@@ -18,7 +129,7 @@ class NokiaPlayerView extends ConsumerStatefulWidget {
 class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     with SingleTickerProviderStateMixin {
   late AnimationController _reelRotationController;
-  String _activeTab = 'SMS';
+  String _activeTab = 'TODOS';
   bool _showVolumeBar = false;
   Timer? _volumeTimer;
 
@@ -87,20 +198,29 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
             children: [
-              Text('[+]', style: textStyle.copyWith(fontSize: 16)),
-              const SizedBox(width: 6),
-              Text('VOLUME', style: textStyle.copyWith(fontSize: 16)),
+              const PixelIcon(matrix: PixelIcon.volume, pixelSize: 2.5),
+              const SizedBox(height: 8),
+              Text(
+                'VOLUME',
+                style: textStyle.copyWith(fontSize: 18, letterSpacing: 2),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Container(
-            height: 40,
+            height: 48,
             margin: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
+              color: const Color(0xFFEDFEED),
               border: Border.all(color: const Color(0xFF111E14), width: 2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF111E14),
+                  offset: Offset(2, 2),
+                ),
+              ],
             ),
             padding: const EdgeInsets.all(4),
             child: Row(
@@ -114,17 +234,13 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                      color: isFilled
-                          ? const Color(0xFF111E14)
-                          : Colors.transparent,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color(
-                              0xFF111E14,
-                            ).withValues(alpha: isFilled ? 0.0 : 0.2),
-                            width: 1,
-                          ),
+                      decoration: BoxDecoration(
+                        color: isFilled
+                            ? const Color(0xFF111E14)
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: const Color(0xFF111E14),
+                          width: 1,
                         ),
                       ),
                     ),
@@ -133,9 +249,12 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               }),
             ),
           ),
-          const SizedBox(height: 12),
-          Text('NIVEL: $volume%', style: textStyle.copyWith(fontSize: 12)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          Text(
+            'NIVEL: $volume%',
+            style: textStyle.copyWith(fontSize: 14, letterSpacing: 1),
+          ),
+          const SizedBox(height: 32),
           GestureDetector(
             onTap: () {
               setState(() {
@@ -143,11 +262,17 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               });
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF111E14)),
+                border: Border.all(color: const Color(0xFF111E14), width: 2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0xFF111E14),
+                    offset: Offset(1, 1),
+                  ),
+                ],
               ),
-              child: Text('VOLTAR', style: textStyle.copyWith(fontSize: 12)),
+              child: Text('VOLTAR', style: textStyle),
             ),
           ),
         ],
@@ -158,53 +283,55 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       children: [
         // Upper Viewport: Cassette Visor or Scan Active
         Container(
-          height: 120,
-          margin: const EdgeInsets.all(8),
+          margin: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFF111E14), width: 2),
             color: const Color(0xFFEDFEED),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0xFF111E14),
+                offset: Offset(2, 2),
+              ),
+            ],
           ),
+          padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (activeAudio != null) ...[
                 // Track details
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text(
-                    activeAudio.title.toUpperCase(),
-                    style: textStyle.copyWith(fontSize: 15),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                Text(
+                  activeAudio.title.toUpperCase(),
+                  style: textStyle.copyWith(fontSize: 16),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   (activeAudio.metadata?.artist ?? 'DESCONHECIDO')
                       .toUpperCase(),
                   style: textStyle.copyWith(
-                    fontSize: 11,
-                    color: const Color(0xFF111E14).withValues(alpha: 0.6),
+                    fontSize: 12,
+                    color: const Color(0xFF111E14).withValues(alpha: 0.7),
                   ),
                   maxLines: 1,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 // Tape Reels Graphics
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildReel(isRewinding),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: 32),
                     _buildReel(isRewinding),
                   ],
                 ),
 
-                const SizedBox(height: 6),
-                // Audio Engine Position/Duration Stream
+                const SizedBox(height: 12),
                 _buildProgressIndicator(textStyle),
               ] else ...[
-                // Scanner Trigger / QR prompt
+                // Scanner Trigger
                 GestureDetector(
                   onTap: () {
                     ref
@@ -213,27 +340,21 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 20,
+                      vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFF111E14),
-                        width: 1,
-                      ),
+                      border: Border.all(color: const Color(0xFF111E14), width: 1),
                       color: const Color(0xFF111E14).withValues(alpha: 0.05),
                     ),
-                    child: Row(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '[O]',
-                          style: textStyle.copyWith(fontSize: 14),
-                        ),
-                        const SizedBox(width: 6),
+                        const PixelIcon(matrix: PixelIcon.camera, pixelSize: 2),
+                        const SizedBox(height: 8),
                         Text(
                           'ESCANEAR CODIGO QR',
-                          style: textStyle.copyWith(fontSize: 13),
+                          style: textStyle.copyWith(fontSize: 14, letterSpacing: 1),
                         ),
                       ],
                     ),
@@ -244,22 +365,21 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           ),
         ),
 
-        // Middle Controls (Play, Pause, Rewind, Stop)
+        // Middle Controls
         if (activeAudio != null)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Rewind
                 _buildControlButton(
-                  textIcon: '<<',
+                  icon: PixelIcon.rewind,
                   onTap: () {
                     ref
                         .read(nokiaAudioPlaybackStatusProvider.notifier)
                         .setStatus(NokiaAudioStatus.rewinding);
                     ref.read(audioEngineProvider).seek(Duration.zero);
-                    Future.delayed(const Duration(milliseconds: 800), () {
+                    Future.delayed(const Duration(milliseconds: 1000), () {
                       ref
                           .read(nokiaAudioPlaybackStatusProvider.notifier)
                           .setStatus(NokiaAudioStatus.loaded);
@@ -267,11 +387,9 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                     });
                   },
                 ),
-                const SizedBox(width: 8),
-
-                // Play / Pause
+                const SizedBox(width: 12),
                 _buildControlButton(
-                  textIcon: isPlaying ? '||' : '|>',
+                  icon: isPlaying ? PixelIcon.pause : PixelIcon.play,
                   isFilled: true,
                   onTap: () {
                     if (isPlaying) {
@@ -281,62 +399,43 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                     }
                   },
                 ),
-                const SizedBox(width: 8),
-
-                // Stop / Eject
+                const SizedBox(width: 12),
                 _buildControlButton(
-                  textIcon: '[x]',
+                  icon: PixelIcon.close,
                   onTap: () {
                     ref.read(audioEngineProvider).stop();
                     ref.read(activeAudioIntelProvider.notifier).clear();
                   },
                 ),
-                const SizedBox(width: 8),
-
-                // Volume Button
+                const SizedBox(width: 12),
                 _buildControlButton(
-                  textIcon: '[+]',
+                  icon: PixelIcon.volume,
                   onTap: _showVolume,
                 ),
               ],
             ),
           ),
 
-        // Tabs Row: SMS, TODOS, AUDIO, DOCS
+        // Tabs Row
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFF111E14), width: 1),
+            color: const Color(0xFFEDFEED),
+            border: Border.all(color: const Color(0xFF111E14), width: 2),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0xFF111E14),
+                offset: Offset(1, 1),
+              ),
+            ],
           ),
           child: Row(
-            children: ['SMS', 'TODOS', 'AUDIO', 'DOCS'].map((tab) {
-              final isActive = _activeTab == tab;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _activeTab = tab;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    color: isActive
-                        ? const Color(0xFF111E14)
-                        : Colors.transparent,
-                    child: Text(
-                      tab,
-                      style: textStyle.copyWith(
-                        fontSize: 11,
-                        color: isActive
-                            ? const Color(0xFFEDFEED)
-                            : const Color(0xFF111E14),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+            children: [
+              _buildTab('SMS', PixelIcon.sms),
+              _buildTab('TODOS', null),
+              _buildTab('AUDIO', PixelIcon.audio),
+              _buildTab('DOCS', PixelIcon.doc),
+            ],
           ),
         ),
 
@@ -350,12 +449,63 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     );
   }
 
+  Widget _buildTab(String label, List<String>? iconMatrix) {
+    final isActive = _activeTab == label;
+    final tabTextStyle = GoogleFonts.vt323(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+      color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+    );
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _activeTab = label;
+          });
+          HapticFeedback.selectionClick();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          color: isActive ? const Color(0xFF111E14) : const Color(0xFFEDFEED),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (iconMatrix != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: PixelIcon(
+                    matrix: iconMatrix,
+                    pixelSize: 1,
+                    color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                  ),
+                )
+              else
+                Text(
+                  '[*]',
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                  ),
+                ),
+              Text(
+                label,
+                style: tabTextStyle,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildReel(bool isRewinding) {
     return RotationTransition(
       turns: _reelRotationController,
       child: Container(
-        width: 24,
-        height: 24,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
           color: const Color(0xFF111E14),
           shape: BoxShape.circle,
@@ -365,20 +515,19 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           alignment: Alignment.center,
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: 10,
+              height: 10,
               decoration: const BoxDecoration(
                 color: Color(0xFFEDFEED),
                 shape: BoxShape.circle,
               ),
             ),
-            // Spokes
             ...List.generate(4, (index) {
               return Transform.rotate(
                 angle: (index * 45) * 3.14159 / 180,
                 child: Container(
-                  width: 20,
-                  height: 1.5,
+                  width: 28,
+                  height: 2,
                   color: const Color(0xFFEDFEED),
                 ),
               );
@@ -390,28 +539,30 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
   }
 
   Widget _buildControlButton({
-    required String textIcon,
+    required List<String> icon,
     required VoidCallback onTap,
     bool isFilled = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 32,
-        height: 32,
+        width: 44,
+        height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isFilled ? const Color(0xFF111E14) : Colors.transparent,
-          border: Border.all(color: const Color(0xFF111E14), width: 1.5),
-          borderRadius: BorderRadius.circular(isFilled ? 16 : 4),
+          color: isFilled ? const Color(0xFF111E14) : const Color(0xFFEDFEED),
+          border: Border.all(color: const Color(0xFF111E14), width: 2),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF111E14),
+              offset: Offset(1, 1),
+            ),
+          ],
         ),
-        child: Text(
-          textIcon,
-          style: GoogleFonts.vt323(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isFilled ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
-          ),
+        child: PixelIcon(
+          matrix: icon,
+          pixelSize: 1.8,
+          color: isFilled ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
         ),
       ),
     );
@@ -427,47 +578,42 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           stream: engine.durationStream,
           builder: (context, snapshotDur) {
             final duration = snapshotDur.data ?? Duration.zero;
-
             final posStr = _formatDuration(position);
             final durStr = _formatDuration(duration);
-
             final double progressPct = duration.inMilliseconds > 0
-                ? (position.inMilliseconds / duration.inMilliseconds).clamp(
-                    0.0,
-                    1.0,
-                  )
+                ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
                 : 0.0;
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(posStr, style: textStyle.copyWith(fontSize: 10)),
-                      Text(durStr, style: textStyle.copyWith(fontSize: 10)),
-                    ],
+            return Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(posStr, style: textStyle.copyWith(fontSize: 12)),
+                    Text(durStr, style: textStyle.copyWith(fontSize: 12)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  height: 16,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFF111E14), width: 1.5),
                   ),
-                  const SizedBox(height: 2),
-                  // Segmented LCD Progress Bar (20 steps)
-                  Row(
+                  child: Row(
                     children: List.generate(20, (index) {
                       final stepPct = (index + 1) / 20.0;
                       final isFilled = progressPct >= stepPct;
                       return Expanded(
                         child: Container(
-                          height: 6,
                           margin: const EdgeInsets.symmetric(horizontal: 0.5),
-                          color: isFilled
-                              ? const Color(0xFF111E14)
-                              : const Color(0xFF111E14).withValues(alpha: 0.08),
+                          color: isFilled ? const Color(0xFF111E14) : Colors.transparent,
                         ),
                       );
                     }),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         );
@@ -486,12 +632,11 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
 
     return intelListAsync.when(
       data: (items) {
-        // Filter locally by tab type
         final filteredItems = items.where((item) {
           if (_activeTab == 'TODOS') return true;
           if (_activeTab == 'AUDIO') return item.type == IntelType.audio;
           if (_activeTab == 'DOCS') {
-            return item.type == IntelType.text || item.type == IntelType.visual;
+            return item.type != IntelType.audio;
           }
           return true;
         }).toList();
@@ -501,17 +646,11 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const PixelIcon(matrix: PixelIcon.doc, pixelSize: 2, color: Color(0xFF111E14)),
+                const SizedBox(height: 12),
                 Text(
-                  'NENHUM INTEL DESBLOQUEADO',
-                  style: textStyle.copyWith(color: const Color(0xFF111E14)),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'ESCANEIE UM CODIGO QR PARA COMECAR',
-                  style: textStyle.copyWith(
-                    fontSize: 10,
-                    color: const Color(0xFF111E14).withValues(alpha: 0.5),
-                  ),
+                  'VAZIO',
+                  style: textStyle.copyWith(fontSize: 16, letterSpacing: 2),
                 ),
               ],
             ),
@@ -521,7 +660,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
         final activeAudio = ref.watch(activeAudioIntelProvider);
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           itemCount: filteredItems.length,
           itemBuilder: (context, index) {
             final item = filteredItems[index];
@@ -532,15 +671,12 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 HapticFeedback.lightImpact();
                 if (item.type == IntelType.audio && item.mediaUrl != null) {
                   ref.read(activeAudioIntelProvider.notifier).select(item);
-                  ref.read(audioEngineProvider).loadTrack(item.mediaUrl!).then((
-                    _,
-                  ) {
+                  ref.read(audioEngineProvider).loadTrack(item.mediaUrl!).then((_) {
                     if (ref.read(activeAudioIntelProvider)?.id == item.id) {
                       ref.read(audioEngineProvider).play();
                     }
                   });
                 } else {
-                  // Show text document / photo details in a simple alert dialog styled like retro LCD
                   showDialog(
                     context: context,
                     builder: (context) => _buildDetailDialog(item, textStyle),
@@ -548,63 +684,49 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 }
               },
               child: Container(
-                margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isCurrent
-                      ? const Color(0xFF111E14)
-                      : Colors.transparent,
-                  border: Border.all(
-                    color: isCurrent
-                        ? const Color(0xFF111E14)
-                        : const Color(0xFF111E14).withValues(alpha: 0.1),
-                  ),
-                  borderRadius: BorderRadius.circular(4),
+                  color: isCurrent ? const Color(0xFF111E14) : const Color(0xFFEDFEED),
+                  border: Border.all(color: const Color(0xFF111E14), width: 2),
+                  boxShadow: [
+                    if (!isCurrent)
+                      const BoxShadow(
+                        color: Color(0xFF111E14),
+                        offset: Offset(1, 1),
+                      ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isCurrent
-                              ? const Color(0xFFEDFEED)
-                              : const Color(0xFF111E14),
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        item.type.name.substring(0, 3),
-                        style: textStyle.copyWith(
-                          fontSize: 9,
-                          color: isCurrent
-                              ? const Color(0xFFEDFEED)
-                              : const Color(0xFF111E14),
-                        ),
-                      ),
+                    PixelIcon(
+                      matrix: item.type == IntelType.audio 
+                        ? PixelIcon.audio 
+                        : (item.type == IntelType.visual ? PixelIcon.camera : PixelIcon.doc),
+                      pixelSize: 1.2,
+                      color: isCurrent ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         item.title.toUpperCase(),
                         style: textStyle.copyWith(
-                          color: isCurrent
-                              ? const Color(0xFFEDFEED)
-                              : const Color(0xFF111E14),
+                          fontSize: 14,
+                          color: isCurrent ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (isCurrent)
-                      Text(
-                        '|>',
-                        style: textStyle.copyWith(
-                          color: const Color(0xFFEDFEED),
-                          fontSize: 10,
-                        ),
+                      Row(
+                        children: List.generate(3, (i) {
+                          return Container(
+                            width: 2,
+                            height: 10,
+                            margin: const EdgeInsets.only(left: 2),
+                            color: const Color(0xFFEDFEED),
+                          );
+                        }),
                       ),
                   ],
                 ),
@@ -616,8 +738,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       loading: () => const Center(
         child: CircularProgressIndicator(color: Color(0xFF111E14)),
       ),
-      error: (err, stack) =>
-          Center(child: Text('ERRO AO CARREGAR INTEL', style: textStyle)),
+      error: (err, stack) => Center(child: Text('ERRO AO CARREGAR INTEL', style: textStyle)),
     );
   }
 
@@ -625,7 +746,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     final smsList = ref.watch(nokiaSmsListProvider);
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       itemCount: smsList.length,
       itemBuilder: (context, index) {
         final sms = smsList[index];
@@ -633,24 +754,22 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
         return GestureDetector(
           onTap: () {
             HapticFeedback.lightImpact();
-            // Mark as read
             ref.read(nokiaSmsListProvider.notifier).markAsRead(sms.id);
-            // Open message detail
             ref.read(nokiaActiveSmsProvider.notifier).select(sms);
-            ref
-                .read(nokiaScreenStateProvider.notifier)
-                .setScreen(NokiaScreen.smsDetail);
+            ref.read(nokiaScreenStateProvider.notifier).setScreen(NokiaScreen.smsDetail);
           },
           child: Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFF111E14).withValues(alpha: 0.1),
-                  width: 1,
+              color: const Color(0xFFEDFEED),
+              border: Border.all(color: const Color(0xFF111E14), width: 2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF111E14),
+                  offset: Offset(1, 1),
                 ),
-              ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,35 +781,32 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                       children: [
                         if (!sms.read)
                           Container(
-                            width: 6,
-                            height: 6,
-                            margin: const EdgeInsets.only(right: 6),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF111E14),
-                              shape: BoxShape.circle,
-                            ),
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(right: 8),
+                            color: const Color(0xFF111E14),
                           ),
                         Text(
                           sms.sender.toUpperCase(),
-                          style: textStyle.copyWith(fontSize: 12),
+                          style: textStyle.copyWith(fontSize: 14),
                         ),
                       ],
                     ),
                     Text(
                       sms.time,
                       style: textStyle.copyWith(
-                        fontSize: 10,
+                        fontSize: 11,
                         color: const Color(0xFF111E14).withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   sms.text,
                   style: textStyle.copyWith(
-                    fontSize: 11,
-                    color: const Color(0xFF111E14).withValues(alpha: 0.8),
+                    fontSize: 13,
+                    color: const Color(0xFF111E14).withValues(alpha: 0.9),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -706,28 +822,38 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
   Widget _buildDetailDialog(IntelItem item, TextStyle textStyle) {
     return Dialog(
       backgroundColor: const Color(0xFFEDFEED),
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(color: Color(0xFF111E14), width: 3),
-        borderRadius: BorderRadius.circular(4),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xFF111E14), width: 3),
       ),
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${item.type.name.toUpperCase()}: ${item.title.toUpperCase()}',
-              style: textStyle.copyWith(fontSize: 16),
+            Row(
+              children: [
+                if (item.type == IntelType.meta && item.metadata?.icon != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(item.metadata!.icon!, style: const TextStyle(fontSize: 24)),
+                  ),
+                Expanded(
+                  child: Text(
+                    '${item.type.name.toUpperCase()}: ${item.title.toUpperCase()}',
+                    style: textStyle.copyWith(fontSize: 16),
+                  ),
+                ),
+              ],
             ),
-            const Divider(color: Color(0xFF111E14), thickness: 1.5),
             const SizedBox(height: 8),
-            if (item.type == IntelType.visual &&
-                item.mediaUrl != null &&
-                item.mediaUrl!.isNotEmpty) ...[
+            const Divider(color: Color(0xFF111E14), thickness: 2),
+            const SizedBox(height: 12),
+            if (item.type == IntelType.visual && item.mediaUrl != null && item.mediaUrl!.isNotEmpty) ...[
               Container(
                 width: double.infinity,
-                height: 160,
+                height: 180,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFF111E14), width: 2),
@@ -735,56 +861,59 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 child: Image.network(
                   item.mediaUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text(
-                        'FALHA AO CARREGAR IMAGEM',
-                        style: textStyle.copyWith(fontSize: 10),
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF111E14),
-                        strokeWidth: 2,
-                      ),
-                    );
-                  },
+                  errorBuilder: (context, error, stackTrace) => const Center(child: Text('ERRO AO CARREGAR IMAGEM')),
                 ),
               ),
             ],
-            Text(item.description, style: textStyle.copyWith(fontSize: 12)),
-            if (item.textContent != null && item.textContent!.isNotEmpty) ...[
+            if (item.type == IntelType.text && item.textContent != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFF111E14), width: 1),
+                ),
+                child: Text(
+                  item.textContent!,
+                  style: textStyle.copyWith(fontSize: 12, height: 1.2),
+                ),
+              ),
+            ],
+            Text(item.description, style: textStyle.copyWith(fontSize: 14)),
+            if (item.type == IntelType.meta && item.metadata?.hint != null && item.metadata!.hint!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF111E14)),
+                  border: Border.all(color: const Color(0xFF111E14).withValues(alpha: 0.3), width: 1, style: BorderStyle.none),
+                  color: const Color(0xFF111E14).withValues(alpha: 0.05),
                 ),
-                child: Text(
-                  item.textContent!,
-                  style: textStyle.copyWith(
-                    fontSize: 11,
-                    fontFamily: 'monospace',
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('DICA:', style: textStyle.copyWith(fontSize: 10, color: const Color(0xFF111E14).withValues(alpha: 0.6))),
+                    const SizedBox(height: 2),
+                    Text(item.metadata!.hint!, style: textStyle.copyWith(fontSize: 12)),
+                  ],
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF111E14)),
+                    border: Border.all(color: const Color(0xFF111E14), width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xFF111E14),
+                        offset: Offset(1, 1),
+                      ),
+                    ],
                   ),
                   child: Text('FECHAR', style: textStyle),
                 ),

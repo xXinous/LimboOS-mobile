@@ -156,38 +156,42 @@ class _NokiaScannerViewState extends ConsumerState<NokiaScannerView> {
                   },
                 ),
 
-                // Targeting Reticle Overlay
-                Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFFEDFEED).withValues(alpha: 0.5),
-                      width: 2,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDFEED).withValues(alpha: 0.8),
-                        shape: BoxShape.circle,
+                // Targeting Reticle Overlay (ASCII Style)
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 160,
+                      height: 160,
+                      child: Stack(
+                        children: [
+                          // Corners
+                          Positioned(top: 0, left: 0, child: Text('┌', style: textStyle.copyWith(fontSize: 24, color: const Color(0xFFEDFEED).withValues(alpha: 0.5)))),
+                          Positioned(top: 0, right: 0, child: Text('┐', style: textStyle.copyWith(fontSize: 24, color: const Color(0xFFEDFEED).withValues(alpha: 0.5)))),
+                          Positioned(bottom: 0, left: 0, child: Text('└', style: textStyle.copyWith(fontSize: 24, color: const Color(0xFFEDFEED).withValues(alpha: 0.5)))),
+                          Positioned(bottom: 0, right: 0, child: Text('┘', style: textStyle.copyWith(fontSize: 24, color: const Color(0xFFEDFEED).withValues(alpha: 0.5)))),
+                        ],
                       ),
                     ),
-                  ),
+                    // Center Point
+                    Container(
+                      width: 4,
+                      height: 4,
+                      color: const Color(0xFFEDFEED).withValues(alpha: 0.8),
+                    ),
+                    Text('+', style: textStyle.copyWith(fontSize: 20, color: const Color(0xFFEDFEED).withValues(alpha: 0.3))),
+                  ],
                 ),
 
                 // Toast/Processing overlay
                 if (_statusMessage != null)
                   Container(
                     color: Colors.black.withValues(alpha: 0.8),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     child: Center(
                       child: Text(
                         _statusMessage!,
-                        style: textStyle.copyWith(fontSize: 18),
+                        style: textStyle.copyWith(fontSize: 20, letterSpacing: 1),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -203,12 +207,18 @@ class _NokiaScannerViewState extends ConsumerState<NokiaScannerView> {
               ref.read(nokiaScreenStateProvider.notifier).setScreen(NokiaScreen.player);
             },
             child: Container(
-              height: 36,
+              height: 44,
               color: const Color(0xFFEDFEED),
               alignment: Alignment.center,
-              child: Text(
-                '[ CANCELAR ]',
-                style: textStyle.copyWith(color: const Color(0xFF111E14)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFF111E14), width: 2),
+                ),
+                child: Text(
+                  'SAIR DO SCANNER',
+                  style: textStyle.copyWith(color: const Color(0xFF111E14), fontSize: 13, letterSpacing: 1),
+                ),
               ),
             ),
           ),
