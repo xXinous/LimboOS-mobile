@@ -58,8 +58,8 @@ class NokiaBottomNav extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('↩', style: textStyle),
-                    const SizedBox(width: 2),
+                    Text('[<]', style: textStyle),
+                    const SizedBox(width: 4),
                     Text('VOLTAR', style: textStyle),
                   ],
                 ),

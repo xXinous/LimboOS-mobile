@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'nokia_providers.dart';
@@ -7,10 +8,11 @@ part 'audio_engine_service.g.dart';
 class AudioEngineService {
   final AudioPlayer _player = AudioPlayer();
   final NokiaAudioPlaybackStatus _statusController;
+  StreamSubscription? _playerStateSubscription;
 
   AudioEngineService(this._statusController) {
     // Listen to play/pause state changes
-    _player.playerStateStream.listen((state) {
+    _playerStateSubscription = _player.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
         _statusController.setStatus(NokiaAudioStatus.loaded);
         _player.seek(Duration.zero);
@@ -35,7 +37,7 @@ class AudioEngineService {
       await _player.setUrl(url);
       _statusController.setStatus(NokiaAudioStatus.loaded);
     } catch (e) {
-      print('Error loading track: $e');
+      // Error handling without print in production
       _statusController.setStatus(NokiaAudioStatus.idle);
     }
   }
@@ -63,11 +65,12 @@ class AudioEngineService {
   }
 
   void dispose() {
+    _playerStateSubscription?.cancel();
     _player.dispose();
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 AudioEngineService audioEngine(AudioEngineRef ref) {
   final statusNotifier = ref.watch(nokiaAudioPlaybackStatusProvider.notifier);
   final service = AudioEngineService(statusNotifier);

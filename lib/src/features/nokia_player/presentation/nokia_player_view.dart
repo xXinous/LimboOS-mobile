@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
+
 import '../domain/intel_item.dart';
 import '../data/nokia_providers.dart';
 import '../data/audio_engine_service.dart';
@@ -17,7 +18,9 @@ class NokiaPlayerView extends ConsumerStatefulWidget {
 class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     with SingleTickerProviderStateMixin {
   late AnimationController _reelRotationController;
-  String _activeTab = 'TODOS';
+  String _activeTab = 'SMS';
+  bool _showVolumeBar = false;
+  Timer? _volumeTimer;
 
   @override
   void initState() {
@@ -31,7 +34,27 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
   @override
   void dispose() {
     _reelRotationController.dispose();
+    _volumeTimer?.cancel();
     super.dispose();
+  }
+
+  void _showVolume() {
+    setState(() {
+      _showVolumeBar = true;
+    });
+    _volumeTimer?.cancel();
+    _volumeTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _showVolumeBar = false;
+        });
+      }
+    });
+  }
+
+  void _adjustVolume(int newVolume) {
+    ref.read(nokiaVolumeProvider.notifier).setVolume(newVolume);
+    _showVolume();
   }
 
   @override
@@ -57,6 +80,79 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       color: const Color(0xFF111E14),
       fontWeight: FontWeight.bold,
     );
+
+    if (_showVolumeBar) {
+      final volume = ref.watch(nokiaVolumeProvider);
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('[+]', style: textStyle.copyWith(fontSize: 16)),
+              const SizedBox(width: 6),
+              Text('VOLUME', style: textStyle.copyWith(fontSize: 16)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 40,
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFF111E14), width: 2),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: List.generate(10, (index) {
+                final level = (index + 1) * 10;
+                final isFilled = volume >= level;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      _adjustVolume(level);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                      color: isFilled
+                          ? const Color(0xFF111E14)
+                          : Colors.transparent,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(
+                              0xFF111E14,
+                            ).withValues(alpha: isFilled ? 0.0 : 0.2),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text('NIVEL: $volume%', style: textStyle.copyWith(fontSize: 12)),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _showVolumeBar = false;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFF111E14)),
+              ),
+              child: Text('VOLTAR', style: textStyle.copyWith(fontSize: 12)),
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       children: [
@@ -84,8 +180,12 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                   ),
                 ),
                 Text(
-                  (activeAudio.metadata?.artist ?? 'DESCONHECIDO').toUpperCase(),
-                  style: textStyle.copyWith(fontSize: 11, color: const Color(0xFF111E14).withValues(alpha: 0.6)),
+                  (activeAudio.metadata?.artist ?? 'DESCONHECIDO')
+                      .toUpperCase(),
+                  style: textStyle.copyWith(
+                    fontSize: 11,
+                    color: const Color(0xFF111E14).withValues(alpha: 0.6),
+                  ),
                   maxLines: 1,
                 ),
                 const SizedBox(height: 8),
@@ -112,17 +212,29 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                         .setScreen(NokiaScreen.scanner);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFF111E14), width: 1),
+                      border: Border.all(
+                        color: const Color(0xFF111E14),
+                        width: 1,
+                      ),
                       color: const Color(0xFF111E14).withValues(alpha: 0.05),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(LucideIcons.camera, color: Color(0xFF111E14), size: 14),
+                        Text(
+                          '[O]',
+                          style: textStyle.copyWith(fontSize: 14),
+                        ),
                         const SizedBox(width: 6),
-                        Text('ESCANEAR CODIGO QR', style: textStyle.copyWith(fontSize: 13)),
+                        Text(
+                          'ESCANEAR CODIGO QR',
+                          style: textStyle.copyWith(fontSize: 13),
+                        ),
                       ],
                     ),
                   ),
@@ -141,12 +253,16 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               children: [
                 // Rewind
                 _buildControlButton(
-                  icon: LucideIcons.rewind,
+                  textIcon: '<<',
                   onTap: () {
-                    ref.read(nokiaAudioPlaybackStatusProvider.notifier).setStatus(NokiaAudioStatus.rewinding);
+                    ref
+                        .read(nokiaAudioPlaybackStatusProvider.notifier)
+                        .setStatus(NokiaAudioStatus.rewinding);
                     ref.read(audioEngineProvider).seek(Duration.zero);
                     Future.delayed(const Duration(milliseconds: 800), () {
-                      ref.read(nokiaAudioPlaybackStatusProvider.notifier).setStatus(NokiaAudioStatus.loaded);
+                      ref
+                          .read(nokiaAudioPlaybackStatusProvider.notifier)
+                          .setStatus(NokiaAudioStatus.loaded);
                       ref.read(audioEngineProvider).play();
                     });
                   },
@@ -155,7 +271,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
 
                 // Play / Pause
                 _buildControlButton(
-                  icon: isPlaying ? LucideIcons.pause : LucideIcons.play,
+                  textIcon: isPlaying ? '||' : '|>',
                   isFilled: true,
                   onTap: () {
                     if (isPlaying) {
@@ -169,24 +285,31 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
 
                 // Stop / Eject
                 _buildControlButton(
-                  icon: LucideIcons.x,
+                  textIcon: '[x]',
                   onTap: () {
                     ref.read(audioEngineProvider).stop();
                     ref.read(activeAudioIntelProvider.notifier).clear();
                   },
                 ),
+                const SizedBox(width: 8),
+
+                // Volume Button
+                _buildControlButton(
+                  textIcon: '[+]',
+                  onTap: _showVolume,
+                ),
               ],
             ),
           ),
 
-        // Tabs Row: TODOS, AUDIO, DOCS, SMS
+        // Tabs Row: SMS, TODOS, AUDIO, DOCS
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFF111E14), width: 1),
           ),
           child: Row(
-            children: ['TODOS', 'AUDIO', 'DOCS', 'SMS'].map((tab) {
+            children: ['SMS', 'TODOS', 'AUDIO', 'DOCS'].map((tab) {
               final isActive = _activeTab == tab;
               return Expanded(
                 child: GestureDetector(
@@ -197,12 +320,16 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    color: isActive ? const Color(0xFF111E14) : Colors.transparent,
+                    color: isActive
+                        ? const Color(0xFF111E14)
+                        : Colors.transparent,
                     child: Text(
                       tab,
                       style: textStyle.copyWith(
                         fontSize: 11,
-                        color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                        color: isActive
+                            ? const Color(0xFFEDFEED)
+                            : const Color(0xFF111E14),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -263,7 +390,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
   }
 
   Widget _buildControlButton({
-    required IconData icon,
+    required String textIcon,
     required VoidCallback onTap,
     bool isFilled = false,
   }) {
@@ -272,15 +399,19 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       child: Container(
         width: 32,
         height: 32,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isFilled ? const Color(0xFF111E14) : Colors.transparent,
           border: Border.all(color: const Color(0xFF111E14), width: 1.5),
           borderRadius: BorderRadius.circular(isFilled ? 16 : 4),
         ),
-        child: Icon(
-          icon,
-          size: 14,
-          color: isFilled ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+        child: Text(
+          textIcon,
+          style: GoogleFonts.vt323(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isFilled ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+          ),
         ),
       ),
     );
@@ -296,12 +427,15 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           stream: engine.durationStream,
           builder: (context, snapshotDur) {
             final duration = snapshotDur.data ?? Duration.zero;
-            
+
             final posStr = _formatDuration(position);
             final durStr = _formatDuration(duration);
 
             final double progressPct = duration.inMilliseconds > 0
-                ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+                ? (position.inMilliseconds / duration.inMilliseconds).clamp(
+                    0.0,
+                    1.0,
+                  )
                 : 0.0;
 
             return Padding(
@@ -356,15 +490,30 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
         final filteredItems = items.where((item) {
           if (_activeTab == 'TODOS') return true;
           if (_activeTab == 'AUDIO') return item.type == IntelType.audio;
-          if (_activeTab == 'DOCS') return item.type == IntelType.text || item.type == IntelType.visual;
+          if (_activeTab == 'DOCS') {
+            return item.type == IntelType.text || item.type == IntelType.visual;
+          }
           return true;
         }).toList();
 
         if (filteredItems.isEmpty) {
           return Center(
-            child: Text(
-              'NENHUM INTEL ENCONTRADO',
-              style: textStyle.copyWith(color: const Color(0xFF111E14).withValues(alpha: 0.4)),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'NENHUM INTEL DESBLOQUEADO',
+                  style: textStyle.copyWith(color: const Color(0xFF111E14)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ESCANEIE UM CODIGO QR PARA COMECAR',
+                  style: textStyle.copyWith(
+                    fontSize: 10,
+                    color: const Color(0xFF111E14).withValues(alpha: 0.5),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -379,12 +528,17 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
             final isCurrent = activeAudio?.id == item.id;
 
             return GestureDetector(
-              onTap: () async {
+              onTap: () {
                 HapticFeedback.lightImpact();
                 if (item.type == IntelType.audio && item.mediaUrl != null) {
                   ref.read(activeAudioIntelProvider.notifier).select(item);
-                  await ref.read(audioEngineProvider).loadTrack(item.mediaUrl!);
-                  ref.read(audioEngineProvider).play();
+                  ref.read(audioEngineProvider).loadTrack(item.mediaUrl!).then((
+                    _,
+                  ) {
+                    if (ref.read(activeAudioIntelProvider)?.id == item.id) {
+                      ref.read(audioEngineProvider).play();
+                    }
+                  });
                 } else {
                   // Show text document / photo details in a simple alert dialog styled like retro LCD
                   showDialog(
@@ -397,19 +551,28 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 margin: const EdgeInsets.only(bottom: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isCurrent ? const Color(0xFF111E14) : Colors.transparent,
+                  color: isCurrent
+                      ? const Color(0xFF111E14)
+                      : Colors.transparent,
                   border: Border.all(
-                    color: isCurrent ? const Color(0xFF111E14) : const Color(0xFF111E14).withValues(alpha: 0.1),
+                    color: isCurrent
+                        ? const Color(0xFF111E14)
+                        : const Color(0xFF111E14).withValues(alpha: 0.1),
                   ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: isCurrent ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                          color: isCurrent
+                              ? const Color(0xFFEDFEED)
+                              : const Color(0xFF111E14),
                         ),
                         borderRadius: BorderRadius.circular(2),
                       ),
@@ -417,7 +580,9 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                         item.type.name.substring(0, 3),
                         style: textStyle.copyWith(
                           fontSize: 9,
-                          color: isCurrent ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                          color: isCurrent
+                              ? const Color(0xFFEDFEED)
+                              : const Color(0xFF111E14),
                         ),
                       ),
                     ),
@@ -426,7 +591,9 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                       child: Text(
                         item.title.toUpperCase(),
                         style: textStyle.copyWith(
-                          color: isCurrent ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                          color: isCurrent
+                              ? const Color(0xFFEDFEED)
+                              : const Color(0xFF111E14),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -434,7 +601,10 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                     if (isCurrent)
                       Text(
                         '|>',
-                        style: textStyle.copyWith(color: const Color(0xFFEDFEED), fontSize: 10),
+                        style: textStyle.copyWith(
+                          color: const Color(0xFFEDFEED),
+                          fontSize: 10,
+                        ),
                       ),
                   ],
                 ),
@@ -446,9 +616,8 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       loading: () => const Center(
         child: CircularProgressIndicator(color: Color(0xFF111E14)),
       ),
-      error: (err, stack) => Center(
-        child: Text('ERRO AO CARREGAR INTEL', style: textStyle),
-      ),
+      error: (err, stack) =>
+          Center(child: Text('ERRO AO CARREGAR INTEL', style: textStyle)),
     );
   }
 
@@ -468,7 +637,9 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
             ref.read(nokiaSmsListProvider.notifier).markAsRead(sms.id);
             // Open message detail
             ref.read(nokiaActiveSmsProvider.notifier).select(sms);
-            ref.read(nokiaScreenStateProvider.notifier).setScreen(NokiaScreen.smsDetail);
+            ref
+                .read(nokiaScreenStateProvider.notifier)
+                .setScreen(NokiaScreen.smsDetail);
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 4),
@@ -507,14 +678,20 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                     ),
                     Text(
                       sms.time,
-                      style: textStyle.copyWith(fontSize: 10, color: const Color(0xFF111E14).withValues(alpha: 0.6)),
+                      style: textStyle.copyWith(
+                        fontSize: 10,
+                        color: const Color(0xFF111E14).withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
                   sms.text,
-                  style: textStyle.copyWith(fontSize: 11, color: const Color(0xFF111E14).withValues(alpha: 0.8)),
+                  style: textStyle.copyWith(
+                    fontSize: 11,
+                    color: const Color(0xFF111E14).withValues(alpha: 0.8),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -540,15 +717,45 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${item.type.name}: ${item.title.toUpperCase()}',
+              '${item.type.name.toUpperCase()}: ${item.title.toUpperCase()}',
               style: textStyle.copyWith(fontSize: 16),
             ),
             const Divider(color: Color(0xFF111E14), thickness: 1.5),
             const SizedBox(height: 8),
-            Text(
-              item.description,
-              style: textStyle.copyWith(fontSize: 12),
-            ),
+            if (item.type == IntelType.visual &&
+                item.mediaUrl != null &&
+                item.mediaUrl!.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                height: 160,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFF111E14), width: 2),
+                ),
+                child: Image.network(
+                  item.mediaUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Text(
+                        'FALHA AO CARREGAR IMAGEM',
+                        style: textStyle.copyWith(fontSize: 10),
+                      ),
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF111E14),
+                        strokeWidth: 2,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+            Text(item.description, style: textStyle.copyWith(fontSize: 12)),
             if (item.textContent != null && item.textContent!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
@@ -559,7 +766,10 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 ),
                 child: Text(
                   item.textContent!,
-                  style: textStyle.copyWith(fontSize: 11, fontFamily: 'monospace'),
+                  style: textStyle.copyWith(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                  ),
                 ),
               ),
             ],
@@ -569,7 +779,10 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: const Color(0xFF111E14)),
                   ),

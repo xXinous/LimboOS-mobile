@@ -10,7 +10,7 @@ String _$audioEngineHash() => r'a9426d9dcc81dd0a144c9545dd32ea62bc1d6aea';
 
 /// See also [audioEngine].
 @ProviderFor(audioEngine)
-final audioEngineProvider = AutoDisposeProvider<AudioEngineService>.internal(
+final audioEngineProvider = Provider<AudioEngineService>.internal(
   audioEngine,
   name: r'audioEngineProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,6 +22,6 @@ final audioEngineProvider = AutoDisposeProvider<AudioEngineService>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef AudioEngineRef = AutoDisposeProviderRef<AudioEngineService>;
+typedef AudioEngineRef = ProviderRef<AudioEngineService>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

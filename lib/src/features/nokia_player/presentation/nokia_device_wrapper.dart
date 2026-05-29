@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../data/nokia_providers.dart';
-import 'nokia_status_bar.dart';
 import 'nokia_bottom_nav.dart';
 
 class ScanlinePainter extends CustomPainter {
@@ -37,63 +37,65 @@ class NokiaDeviceWrapper extends ConsumerWidget {
         audioPlaybackStatus == NokiaAudioStatus.loading ||
         activeScreen == NokiaScreen.scanner;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDFEED), // LCD Green background
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Screen Inner Borders
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFF111E14).withValues(alpha: 0.15),
-                    width: 1,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEDFEED), // LCD Green background
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Screen Inner Borders
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFF111E14).withValues(alpha: 0.15),
+                      width: 1,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Screen Content Column
-            Column(
-              children: [
-                // Top Status Bar (Hidden during scanning)
-                if (!isScanning) const NokiaStatusBar(),
+              // Screen Content Column
+              Column(
+                children: [
+                  // Viewport
+                  Expanded(child: child),
 
-                // Viewport
-                Expanded(child: child),
-
-                // Bottom Navigation Bar (Hidden during scanning)
-                if (!isScanning)
-                  NokiaBottomNav(
-                    onBack: () {
-                      if (activeScreen == NokiaScreen.smsDetail) {
+                  // Bottom Navigation Bar (Hidden during scanning)
+                  if (!isScanning)
+                    NokiaBottomNav(
+                      onBack: () {
+                        if (activeScreen == NokiaScreen.smsDetail) {
+                          ref
+                              .read(nokiaScreenStateProvider.notifier)
+                              .setScreen(NokiaScreen.player);
+                        } else if (activeScreen != NokiaScreen.player) {
+                          ref
+                              .read(nokiaScreenStateProvider.notifier)
+                              .setScreen(NokiaScreen.player);
+                        }
+                      },
+                      onProfileOpen: () {
                         ref
                             .read(nokiaScreenStateProvider.notifier)
-                            .setScreen(NokiaScreen.player);
-                      } else if (activeScreen != NokiaScreen.player) {
-                        ref
-                            .read(nokiaScreenStateProvider.notifier)
-                            .setScreen(NokiaScreen.player);
-                      }
-                    },
-                    onProfileOpen: () {
-                      ref
-                          .read(nokiaScreenStateProvider.notifier)
-                          .setScreen(NokiaScreen.profile);
-                    },
-                    backVisible: activeScreen != NokiaScreen.player,
-                  ),
-              ],
-            ),
-
-            // CRT Scanline Overlay
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(painter: ScanlinePainter()),
+                            .setScreen(NokiaScreen.profile);
+                      },
+                      backVisible: activeScreen != NokiaScreen.player,
+                    ),
+                ],
               ),
-            ),
-          ],
+
+              // CRT Scanline Overlay
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(painter: ScanlinePainter()),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

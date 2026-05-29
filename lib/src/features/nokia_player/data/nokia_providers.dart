@@ -3,6 +3,8 @@ import '../domain/intel_item.dart';
 import '../domain/nokia_sms.dart';
 import 'intel_repository.dart';
 import '../../campaigns/data/active_campaign_provider.dart';
+import '../../auth/data/auth_repository.dart';
+import '../../characters/data/character_providers.dart';
 
 part 'nokia_providers.g.dart';
 
@@ -13,7 +15,7 @@ enum NokiaScreen {
   smsDetail,
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaScreenState extends _$NokiaScreenState {
   @override
   NokiaScreen build() => NokiaScreen.player;
@@ -23,7 +25,7 @@ class NokiaScreenState extends _$NokiaScreenState {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaVolume extends _$NokiaVolume {
   @override
   int build() => 80;
@@ -33,7 +35,7 @@ class NokiaVolume extends _$NokiaVolume {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaMute extends _$NokiaMute {
   @override
   bool build() => false;
@@ -47,7 +49,7 @@ class NokiaMute extends _$NokiaMute {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ActiveAudioIntel extends _$ActiveAudioIntel {
   @override
   IntelItem? build() => null;
@@ -69,7 +71,7 @@ enum NokiaAudioStatus {
   rewinding,
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaAudioPlaybackStatus extends _$NokiaAudioPlaybackStatus {
   @override
   NokiaAudioStatus build() => NokiaAudioStatus.idle;
@@ -79,7 +81,7 @@ class NokiaAudioPlaybackStatus extends _$NokiaAudioPlaybackStatus {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaActiveSms extends _$NokiaActiveSms {
   @override
   NokiaSms? build() => null;
@@ -93,7 +95,7 @@ class NokiaActiveSms extends _$NokiaActiveSms {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NokiaSmsList extends _$NokiaSmsList {
   @override
   List<NokiaSms> build() {
@@ -137,18 +139,33 @@ class NokiaSmsList extends _$NokiaSmsList {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
+Stream<List<String>> unlockedIntelIds(UnlockedIntelIdsRef ref) {
+  final authState = ref.watch(authStateChangesProvider).value;
+  final character = ref.watch(activeCharacterProvider);
+  if (authState == null || character == null) {
+    return Stream.value([]);
+  }
+  final intelRepo = ref.watch(intelRepositoryProvider);
+  return intelRepo.watchUnlockedIntelIds(authState.uid, character.id);
+}
+
+@Riverpod(keepAlive: true)
 Stream<List<IntelItem>> campaignIntelList(CampaignIntelListRef ref) {
   final intelRepo = ref.watch(intelRepositoryProvider);
   final activeCampaign = ref.watch(activeCampaignProvider).value;
+  final unlockedIdsAsync = ref.watch(unlockedIntelIdsProvider);
   
   // Exposes a stream of all media assets from Firestore
   return intelRepo.watchAllMediaAssets().map((allMedia) {
     if (activeCampaign == null) return [];
-    // Filter to show only items matching active campaign or items without campaignId
+    final unlockedIds = unlockedIdsAsync.value ?? [];
+    
+    // Filter to show only items matching active campaign AND are unlocked by this character
     return allMedia
         .where((item) =>
-            item.campaignId == null || item.campaignId == activeCampaign.id)
+            (item.campaignId == null || item.campaignId == activeCampaign.id) &&
+            unlockedIds.contains(item.id))
         .toList();
   });
 }

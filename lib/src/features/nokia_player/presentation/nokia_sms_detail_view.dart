@@ -64,31 +64,63 @@ class NokiaSmsDetailView extends ConsumerWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFF111E14), width: 1),
               ),
-              child: SingleChildScrollView(
-                child: Text(
-                  sms.text,
-                  style: textStyle.copyWith(
-                    fontSize: 13,
-                    height: 1.2,
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Text(
+                      sms.text,
+                      style: textStyle.copyWith(
+                        fontSize: 14,
+                        height: 1.2,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
-                ),
+                  // Character count / position indicator placeholder
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      color: const Color(0xFFEDFEED),
+                      child: Text(
+                        '${sms.text.length}/160',
+                        style: textStyle.copyWith(fontSize: 9, color: const Color(0xFF111E14).withValues(alpha: 0.5)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           
           const SizedBox(height: 8),
           
-          // Back prompt help
-          Center(
-            child: Text(
-              'APERTE [VOLTAR] PARA SAIR',
-              style: textStyle.copyWith(
-                fontSize: 10,
-                color: const Color(0xFF111E14).withValues(alpha: 0.5),
-              ),
-            ),
+          // Bottom Actions
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildSimpleButton('REPLICAR', textStyle),
+              const SizedBox(width: 8),
+              _buildSimpleButton('EXCLUIR', textStyle),
+            ],
           ),
+          
+          const SizedBox(height: 4),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSimpleButton(String label, TextStyle style) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF111E14)),
+      ),
+      child: Text(
+        label,
+        style: style.copyWith(fontSize: 10),
       ),
     );
   }
