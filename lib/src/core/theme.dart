@@ -36,6 +36,7 @@ class RetroTheme {
         primaryContainer: kRetroOrange,
       ),
       scaffoldBackgroundColor: kSurface,
+      fontFamily: 'Inter', // Define a fonte local como padrão
       textTheme: GoogleFonts.interTextTheme(
         ThemeData.dark().textTheme,
       ).copyWith(
