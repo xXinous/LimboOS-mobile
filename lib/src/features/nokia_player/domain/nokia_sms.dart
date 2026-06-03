@@ -1,9 +1,30 @@
+class NokiaMessage {
+  final String id;
+  final String senderId;
+  final String senderName;
+  final String text;
+  final String time;
+  final int timestamp;
+  final bool isMe;
+
+  NokiaMessage({
+    required this.id,
+    required this.senderId,
+    required this.senderName,
+    required this.text,
+    required this.time,
+    required this.timestamp,
+    required this.isMe,
+  });
+}
+
 class NokiaSms {
   final String id;
   final String sender;
   final String text;
   final String time;
   final bool read;
+  final List<NokiaMessage> messages;
 
   NokiaSms({
     required this.id,
@@ -11,6 +32,7 @@ class NokiaSms {
     required this.text,
     required this.time,
     this.read = false,
+    this.messages = const [],
   });
 
   NokiaSms copyWith({
@@ -19,6 +41,7 @@ class NokiaSms {
     String? text,
     String? time,
     bool? read,
+    List<NokiaMessage>? messages,
   }) {
     return NokiaSms(
       id: id ?? this.id,
@@ -26,6 +49,7 @@ class NokiaSms {
       text: text ?? this.text,
       time: time ?? this.time,
       read: read ?? this.read,
+      messages: messages ?? this.messages,
     );
   }
 

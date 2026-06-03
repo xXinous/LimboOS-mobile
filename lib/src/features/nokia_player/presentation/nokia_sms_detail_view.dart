@@ -60,36 +60,73 @@ class NokiaSmsDetailView extends ConsumerWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFF111E14), width: 1),
+                color: const Color(0xFFEDFEED).withValues(alpha: 0.5),
               ),
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: Text(
-                      sms.text,
-                      style: textStyle.copyWith(
-                        fontSize: 14,
-                        height: 1.2,
-                        letterSpacing: 0.5,
-                      ),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: sms.messages.length,
+                itemBuilder: (context, index) {
+                  final msg = sms.messages[index];
+                  final isMe = msg.isMe;
+                  final screenWidth = MediaQuery.of(context).size.width;
+
+                  return Container(
+                    margin: EdgeInsets.only(
+                      bottom: 12,
+                      left: isMe ? 40.0 : 4.0,
+                      right: isMe ? 4.0 : 40.0,
                     ),
-                  ),
-                  // Character count / position indicator placeholder
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      color: const Color(0xFFEDFEED),
-                      child: Text(
-                        '${sms.text.length}/160',
-                        style: textStyle.copyWith(fontSize: 9, color: const Color(0xFF111E14).withValues(alpha: 0.5)),
-                      ),
+                    child: Row(
+                      mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: screenWidth * 0.75),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isMe ? const Color(0xFF111E14) : const Color(0xFFEDFEED),
+                              border: Border.all(color: const Color(0xFF111E14), width: 1.5),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0xFF111E14),
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  msg.text,
+                                  textAlign: isMe ? TextAlign.right : TextAlign.left,
+                                  style: textStyle.copyWith(
+                                    fontSize: 14,
+                                    height: 1.2,
+                                    letterSpacing: 0.5,
+                                    color: isMe ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  msg.time,
+                                  style: textStyle.copyWith(
+                                    fontSize: 9,
+                                    color: isMe 
+                                      ? const Color(0xFFEDFEED).withValues(alpha: 0.6) 
+                                      : const Color(0xFF111E14).withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
