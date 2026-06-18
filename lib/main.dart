@@ -26,15 +26,15 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: RunningManApp(),
+      child: LimboOSApp(),
     ),
   );
   // Splash NÃO é removida aqui — será removida pelo AppStartupWidget
   // quando os providers principais estiverem carregados
 }
 
-class RunningManApp extends ConsumerWidget {
-  const RunningManApp({super.key});
+class LimboOSApp extends ConsumerWidget {
+  const LimboOSApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +42,7 @@ class RunningManApp extends ConsumerWidget {
 
     return AppStartupWidget(
       child: MaterialApp.router(
-        title: 'Running Man - Limbo OS',
+        title: 'Limbo OS',
         debugShowCheckedModeBanner: false,
         theme: RetroTheme.darkTheme,
         routerConfig: router,

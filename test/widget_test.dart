@@ -11,7 +11,7 @@ void main() {
         overrides: [
           authStateChangesProvider.overrideWith((ref) => Stream.value(null)),
         ],
-        child: const RunningManApp(),
+        child: const LimboOSApp(),
       ),
     );
 

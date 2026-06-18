@@ -134,7 +134,7 @@ class SelectAgentScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Text(
-                  'ACESSO RESTRITO // PROTOCOLO RUNNING MAN V4.0',
+                  'ACESSO RESTRITO // PROTOCOLO LIMBO OS V4.0',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: RetroTheme.kIndustrialSilver.withValues(alpha: 0.2),
                     letterSpacing: 3,

@@ -85,7 +85,7 @@ class LoginScreen extends HookConsumerWidget {
                         style: Theme.of(context).textTheme.displayMedium,
                       ),
                       Text(
-                        'PONTO DE ACESSO À REDE RUNNING MAN',
+                        'PONTO DE ACESSO À REDE LIMBO OS',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],

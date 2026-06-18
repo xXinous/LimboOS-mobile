@@ -20,7 +20,7 @@ class AuthRepository {
 
   String _masterIdToEmail(String masterId) {
     final slug = masterId.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9._-]'), '_');
-    return '$slug@runningman.local';
+    return '$slug@limboos.local';
   }
 
   Future<MasterAccount> loginOrCreate(String masterId, String password) async {
