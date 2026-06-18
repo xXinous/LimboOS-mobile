@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../nokia_theme.dart';
 import '../data/nokia_providers.dart';
 import 'nokia_bottom_nav.dart';
 
 class ScanlinePainter extends CustomPainter {
   const ScanlinePainter();
 
+  // Paint estático: alocado uma única vez, não a cada chamada de paint()
+  static final _paint = Paint()
+    ..color = NokiaTheme.kBlackInk.withValues(alpha: 0.03)
+    ..strokeWidth = 1.0;
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF111E14).withValues(alpha: 0.03)
-      ..strokeWidth = 1.0;
-
     for (double y = 0; y < size.height; y += 3) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), _paint);
     }
   }
 
@@ -42,7 +44,7 @@ class NokiaDeviceWrapper extends ConsumerWidget {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFFEDFEED), // LCD Green background
+        backgroundColor: NokiaTheme.kLcdGreen, // LCD Green background
         body: SafeArea(
           child: Stack(
             children: [
@@ -51,7 +53,7 @@ class NokiaDeviceWrapper extends ConsumerWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: const Color(0xFF111E14).withValues(alpha: 0.15),
+                      color: NokiaTheme.kBlackInk.withValues(alpha: 0.15),
                       width: 1,
                     ),
                   ),
@@ -67,17 +69,10 @@ class NokiaDeviceWrapper extends ConsumerWidget {
                   // Bottom Navigation Bar (Hidden during scanning)
                   if (!isScanning)
                     NokiaBottomNav(
-                      onBack: () {
-                        if (activeScreen == NokiaScreen.smsDetail) {
-                          ref
-                              .read(nokiaScreenStateProvider.notifier)
-                              .setScreen(NokiaScreen.player);
-                        } else if (activeScreen != NokiaScreen.player) {
-                          ref
-                              .read(nokiaScreenStateProvider.notifier)
-                              .setScreen(NokiaScreen.player);
-                        }
-                      },
+                      onBack: () =>
+                      ref
+                          .read(nokiaScreenStateProvider.notifier)
+                          .setScreen(NokiaScreen.player),
                       onProfileOpen: () {
                         ref
                             .read(nokiaScreenStateProvider.notifier)

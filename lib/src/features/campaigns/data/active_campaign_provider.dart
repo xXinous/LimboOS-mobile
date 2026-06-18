@@ -13,9 +13,15 @@ Stream<Campaign?> activeCampaign(ActiveCampaignRef ref) {
   }
 
   return ref.watch(campaignRepositoryProvider).watchActiveCampaigns().map(
-    (campaigns) => campaigns.firstWhere(
-      (c) => c.id == activeCharacter.campaignId,
-      orElse: () => throw Exception('Campaign not found'),
-    ),
+    (campaigns) {
+      try {
+        return campaigns.firstWhere(
+          (c) => c.id == activeCharacter.campaignId,
+        );
+      } catch (_) {
+        // Campanha não encontrada na lista ativa — retorna null sem lançar exceção
+        return null;
+      }
+    },
   );
 }

@@ -168,44 +168,6 @@ class IntelItem {
   }
 }
 
-class PlayerIntelCollection {
-  final List<IntelItem> items;
-  final Map<IntelType, List<IntelItem>> byType;
-  final Map<int, List<IntelItem>> byLevel;
-  final List<String> unlockedIds;
-  final int totalCount;
-  final int audioCount;
-  final int visualCount;
-  final int textCount;
-  final int metaCount;
-
-  PlayerIntelCollection({
-    required this.items,
-    required this.byType,
-    required this.byLevel,
-    required this.unlockedIds,
-    required this.totalCount,
-    required this.audioCount,
-    required this.visualCount,
-    required this.textCount,
-    required this.metaCount,
-  });
-
-  factory PlayerIntelCollection.empty() {
-    return PlayerIntelCollection(
-      items: [],
-      byType: {IntelType.audio: [], IntelType.visual: [], IntelType.text: [], IntelType.meta: []},
-      byLevel: {1: [], 2: [], 3: [], 4: []},
-      unlockedIds: [],
-      totalCount: 0,
-      audioCount: 0,
-      visualCount: 0,
-      textCount: 0,
-      metaCount: 0,
-    );
-  }
-}
-
 final List<IntelItem> localIntelItems = [
   IntelItem(
     id: 'evidence-disk-01-corrupted',

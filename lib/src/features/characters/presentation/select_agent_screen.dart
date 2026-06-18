@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/retro_decorations.dart';
+import '../../../core/widgets/retro_skeleton.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/character_repository.dart';
 import '../data/character_providers.dart';
@@ -112,8 +113,8 @@ class SelectAgentScreen extends ConsumerWidget {
                             if (campaignId != null && !unlocked.contains(campaignId)) {
                               unlocked.add(campaignId);
                             }
+                            // Preserve existing campaignId so returning players skip campaign selection
                             final characterForSelection = character.copyWith(
-                              campaignId: null,
                               unlockedCampaigns: unlocked,
                             );
                             ref.read(activeCharacterProvider.notifier).select(characterForSelection);
@@ -122,9 +123,7 @@ class SelectAgentScreen extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: RetroTheme.kPrimary),
-                  ),
+                  loading: () => RetroSkeleton.agentList(),
                   error: (err, stack) => Center(
                     child: Text('ERRO DE COMUNICAÇÃO: $err', style: const TextStyle(color: Colors.red)),
                   ),

@@ -21,7 +21,7 @@ class CampaignRepository {
     return _firestore
         .collection('campaigns')
         .where('status', isEqualTo: 'Ativa')
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .map((snapshot) =>
             snapshot.docs.map((doc) => Campaign.fromFirestore(doc)).toList());
   }

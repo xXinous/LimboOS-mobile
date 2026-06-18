@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/retro_decorations.dart';
+import '../../../core/widgets/retro_skeleton.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../characters/data/character_providers.dart';
 import '../data/campaign_repository.dart';
@@ -125,9 +127,7 @@ class _CampaignSelectionScreenState extends ConsumerState<CampaignSelectionScree
                       ],
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: RetroTheme.kPrimary),
-                  ),
+                  loading: () => RetroSkeleton.campaignCarousel(),
                   error: (err, stack) => Center(
                     child: Text('ERRO: $err', style: const TextStyle(color: Colors.red)),
                   ),
@@ -176,16 +176,28 @@ class _CampaignSelectionScreenState extends ConsumerState<CampaignSelectionScree
     final user = ref.read(authRepositoryProvider).currentUser;
     
     if (activeCharacter != null && user != null) {
-      await ref.read(campaignRepositoryProvider).setActiveCampaign(
-        user.uid,
-        activeCharacter.id,
-        campaign.id,
-      );
-      
-      // Update local state to trigger router redirect
+      // Optimistic: update local state FIRST → navigate immediately
       ref.read(activeCharacterProvider.notifier).select(
         activeCharacter.copyWith(campaignId: campaign.id),
       );
+
+      // Fire-and-forget: sync to Firebase in background
+      ref.read(campaignRepositoryProvider).setActiveCampaign(
+        user.uid,
+        activeCharacter.id,
+        campaign.id,
+      ).catchError((e) {
+        // Revert on failure
+        ref.read(activeCharacterProvider.notifier).select(activeCharacter);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ERRO DE SINCRONIZAÇÃO — TENTE NOVAMENTE'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -331,10 +343,11 @@ class CampaignCard extends StatelessWidget {
           children: [
             // Background Image with Overlay
             Positioned.fill(
-              child: Image.network(
-                campaign.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: campaign.imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(color: Colors.black),
+                errorWidget: (_, _, _) => Container(color: Colors.black),
+                placeholder: (_, _) => Container(color: Colors.black),
               ),
             ),
             Positioned.fill(

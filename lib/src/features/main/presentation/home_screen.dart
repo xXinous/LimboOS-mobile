@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../../core/widgets/retro_skeleton.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../characters/data/character_providers.dart';
 import '../../campaigns/data/active_campaign_provider.dart';
@@ -24,23 +25,39 @@ class HomeScreen extends ConsumerWidget {
         if (campaign != null && campaign.playerType == PlayerType.nokia) {
           final nokiaScreen = ref.watch(nokiaScreenStateProvider);
 
-          Widget innerView;
+          // Map screens to IndexedStack indices (scanner is handled separately)
+          int stackIndex;
           switch (nokiaScreen) {
-            case NokiaScreen.player:
-              innerView = const NokiaPlayerView();
-              break;
             case NokiaScreen.profile:
-              innerView = const NokiaProfileView();
-              break;
-            case NokiaScreen.scanner:
-              innerView = const NokiaScannerView();
+              stackIndex = 1;
               break;
             case NokiaScreen.smsDetail:
-              innerView = const NokiaSmsDetailView();
+              stackIndex = 2;
+              break;
+            case NokiaScreen.player:
+            case NokiaScreen.scanner:
+              stackIndex = 0;
               break;
           }
 
-          return NokiaDeviceWrapper(child: innerView);
+          // IndexedStack preserves state of all children (scroll, text fields, etc.)
+          // Scanner is overlaid conditionally to avoid keeping camera active in background
+          return NokiaDeviceWrapper(
+            child: Stack(
+              children: [
+                IndexedStack(
+                  index: stackIndex,
+                  children: const [
+                    NokiaPlayerView(),
+                    NokiaProfileView(),
+                    NokiaSmsDetailView(),
+                  ],
+                ),
+                if (nokiaScreen == NokiaScreen.scanner)
+                  const Positioned.fill(child: NokiaScannerView()),
+              ],
+            ),
+          );
         }
 
         // Default Walkman/Placeholder view
@@ -74,11 +91,9 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(
+      loading: () => Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.orange),
-        ),
+        body: RetroSkeleton.fullScreen(),
       ),
       error: (err, stack) => Scaffold(
         body: Center(

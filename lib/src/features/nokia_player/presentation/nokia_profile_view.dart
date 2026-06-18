@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../characters/data/character_providers.dart';
 import '../../characters/domain/character.dart';
-import '../../campaigns/data/active_campaign_provider.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/nokia_providers.dart';
 
@@ -14,8 +14,6 @@ class NokiaProfileView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final character = ref.watch(activeCharacterProvider);
-    // ignore: unused_local_variable
-    final activeCampaign = ref.watch(activeCampaignProvider).value;
     final intelListAsync = ref.watch(campaignIntelListProvider);
 
     // In a real app, achievementIds would be part of the character data or a separate provider.
@@ -136,8 +134,8 @@ class NokiaProfileView extends ConsumerWidget {
                                 1,
                                 0,
                               ]),
-                              child: Image.network(
-                                character.profilePhotoUrl!,
+                              child: CachedNetworkImage(
+                                imageUrl: character.profilePhotoUrl!,
                                 fit: BoxFit.cover,
                               ),
                             )
@@ -366,6 +364,13 @@ class NokiaProfileView extends ConsumerWidget {
           // Actions (Matches Web Style)
           _buildActionItem('ALVO / MISSÃO', '>>', () {
             HapticFeedback.mediumImpact();
+            // Clear campaignId to trigger GoRouter redirect to campaign selection
+            final current = ref.read(activeCharacterProvider);
+            if (current != null) {
+              ref.read(activeCharacterProvider.notifier).select(
+                current.copyWith(campaignId: null),
+              );
+            }
           }, textStyle),
           const SizedBox(height: 8),
           _buildActionItem('TROCAR AGENTE', '>>', () {

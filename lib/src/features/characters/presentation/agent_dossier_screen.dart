@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/retro_decorations.dart';
 import '../../characters/domain/character.dart';
@@ -104,7 +105,10 @@ class AgentDossierScreen extends ConsumerWidget {
             border: Border.all(color: RetroTheme.kPrimary, width: 2),
           ),
           child: character.profilePhotoUrl != null
-              ? Image.network(character.profilePhotoUrl!, fit: BoxFit.cover)
+              ? CachedNetworkImage(
+                  imageUrl: character.profilePhotoUrl!,
+                  fit: BoxFit.cover,
+                )
               : Center(
                   child: Text(
                     character.codinome.substring(0, 1).toUpperCase(),

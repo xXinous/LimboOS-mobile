@@ -124,6 +124,6 @@ Stream<MasterAccount?> currentMasterAccount(CurrentMasterAccountRef ref) {
   return FirebaseFirestore.instance
       .collection('users')
       .doc(user.uid)
-      .snapshots()
+      .snapshots(includeMetadataChanges: true)
       .map((doc) => doc.exists ? MasterAccount.fromFirestore(doc) : null);
 }

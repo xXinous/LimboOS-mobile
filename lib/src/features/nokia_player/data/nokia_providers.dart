@@ -242,13 +242,13 @@ class NokiaSmsList extends _$NokiaSmsList {
     final sortedList = convMap.values.toList();
     sortedList.sort((a, b) => b.messages.last.timestamp.compareTo(a.messages.last.timestamp));
     
-    // Preserve read state from previous state if possible
+    // Preservar read state: O(1) por lookup via Map em vez de O(n) por item
+    final readStateMap = <String, bool>{
+      for (final sms in state) sms.id: sms.read,
+    };
     state = sortedList.map((newSms) {
-       final oldSms = state.where((s) => s.id == newSms.id).firstOrNull;
-       if (oldSms != null) {
-           return newSms.copyWith(read: oldSms.read);
-       }
-       return newSms;
+      final wasRead = readStateMap[newSms.id];
+      return wasRead != null ? newSms.copyWith(read: wasRead) : newSms;
     }).toList();
   }
 
@@ -282,7 +282,8 @@ Stream<List<IntelItem>> campaignIntelList(CampaignIntelListRef ref) {
     if (activeCampaign == null) return [];
     final unlockedIds = unlockedIdsAsync.value ?? [];
     
-    // Combine remote assets and local hardcoded assets
+    // localIntelItems é constante: a concatenação é feita uma vez por snapshot Firestore,
+    // mas a lista local nunca muda — considerável como custo fixo aceitável.
     final combinedMedia = [...allMedia, ...localIntelItems];
     
     // Filter to show only items matching active campaign AND are unlocked by this character

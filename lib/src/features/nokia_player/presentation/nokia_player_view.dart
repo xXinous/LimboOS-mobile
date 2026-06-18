@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../domain/intel_item.dart';
 import '../data/nokia_providers.dart';
 import '../data/audio_engine_service.dart';
+import '../../../core/widgets/retro_skeleton.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /* ─── PIXEL ART WIDGET ─── */
 class PixelIcon extends StatelessWidget {
@@ -129,6 +131,8 @@ class NokiaPlayerView extends ConsumerStatefulWidget {
 class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     with SingleTickerProviderStateMixin {
   late AnimationController _reelRotationController;
+  // TextStyle base declarado como campo: alocado uma vez por State, não a cada build()
+  late final TextStyle _baseTextStyle;
   String _activeTab = 'TODOS';
   bool _showVolumeBar = false;
   Timer? _volumeTimer;
@@ -139,6 +143,11 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     _reelRotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
+    );
+    _baseTextStyle = GoogleFonts.vt323(
+      fontSize: 14,
+      color: const Color(0xFF111E14),
+      fontWeight: FontWeight.bold,
     );
   }
 
@@ -174,7 +183,6 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     final activeAudio = ref.watch(activeAudioIntelProvider);
 
     final isPlaying = audioPlaybackStatus == NokiaAudioStatus.playing;
-    final isRewinding = audioPlaybackStatus == NokiaAudioStatus.rewinding;
 
     if (isPlaying) {
       if (!_reelRotationController.isAnimating) {
@@ -186,11 +194,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
       }
     }
 
-    final textStyle = GoogleFonts.vt323(
-      fontSize: 14,
-      color: const Color(0xFF111E14),
-      fontWeight: FontWeight.bold,
-    );
+    final textStyle = _baseTextStyle;
 
     if (_showVolumeBar) {
       final volume = ref.watch(nokiaVolumeProvider);
@@ -322,9 +326,9 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildReel(isRewinding),
+                    ReelWidget(controller: _reelRotationController),
                     const SizedBox(width: 32),
-                    _buildReel(isRewinding),
+                    ReelWidget(controller: _reelRotationController),
                   ],
                 ),
 
@@ -474,10 +478,13 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               if (iconMatrix != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: PixelIcon(
-                    matrix: iconMatrix,
-                    pixelSize: 1,
-                    color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                  // RepaintBoundary: ícone estático não precisa ser repintado quando a aba muda
+                  child: RepaintBoundary(
+                    child: PixelIcon(
+                      matrix: iconMatrix,
+                      pixelSize: 1,
+                      color: isActive ? const Color(0xFFEDFEED) : const Color(0xFF111E14),
+                    ),
                   ),
                 )
               else
@@ -495,44 +502,6 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReel(bool isRewinding) {
-    return RotationTransition(
-      turns: _reelRotationController,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: const Color(0xFF111E14),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFEDFEED), width: 2),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEDFEED),
-                shape: BoxShape.circle,
-              ),
-            ),
-            ...List.generate(4, (index) {
-              return Transform.rotate(
-                angle: (index * 45) * 3.14159 / 180,
-                child: Container(
-                  width: 28,
-                  height: 2,
-                  color: const Color(0xFFEDFEED),
-                ),
-              );
-            }),
-          ],
         ),
       ),
     );
@@ -735,9 +704,7 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
           },
         );
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: Color(0xFF111E14)),
-      ),
+      loading: () => RetroSkeleton.nokiaList(),
       error: (err, stack) => Center(child: Text('ERRO AO CARREGAR INTEL', style: textStyle)),
     );
   }
@@ -858,10 +825,10 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFF111E14), width: 2),
                 ),
-                child: Image.network(
-                  item.mediaUrl!,
+                child: CachedNetworkImage(
+                  imageUrl: item.mediaUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Center(child: Text('ERRO AO CARREGAR IMAGEM')),
+                  errorWidget: (context, url, error) => const Center(child: Text('ERRO AO CARREGAR IMAGEM')),
                 ),
               ),
             ],
@@ -925,3 +892,51 @@ class _NokiaPlayerViewState extends ConsumerState<NokiaPlayerView>
     );
   }
 }
+
+/// Widget de carretel de fita cassete extraído como StatelessWidget para
+/// que o Flutter possa cachear a subárvore durante a animação de rotação.
+class ReelWidget extends StatelessWidget {
+  final AnimationController controller;
+
+  const ReelWidget({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: controller,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: const Color(0xFF111E14),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFEDFEED), width: 2),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEDFEED),
+                shape: BoxShape.circle,
+              ),
+            ),
+            ...List.generate(4, (index) {
+              return Transform.rotate(
+                angle: (index * 45) * 3.14159 / 180,
+                child: Container(
+                  width: 28,
+                  height: 2,
+                  color: const Color(0xFFEDFEED),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -73,13 +73,15 @@ class NokiaBottomNav extends ConsumerWidget {
             ),
           )
         else
-          const Opacity(
-            opacity: 0,
-            child: IgnorePointer(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text('VOLTAR'),
-              ),
+          // Visibility mantém o layout mas não pinta o widget — mais eficiente que Opacity(opacity:0)
+          const Visibility(
+            visible: false,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text('VOLTAR'),
             ),
           ),
 

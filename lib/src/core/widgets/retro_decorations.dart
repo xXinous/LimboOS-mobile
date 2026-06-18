@@ -1,4 +1,5 @@
 
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class RetroDecorations extends StatelessWidget {
@@ -50,19 +51,38 @@ class NoiseOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
+    return const IgnorePointer(
       child: Opacity(
         opacity: 0.03,
-        child: Image.network(
-          'https://grainy-gradients.vercel.app/noise.svg', // Temporary placeholder for noise
-          errorBuilder: (context, error, stackTrace) => const SizedBox(),
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+        child: CustomPaint(
+          painter: _NoisePainter(),
+          size: Size.infinite,
         ),
       ),
     );
   }
+}
+
+class _NoisePainter extends CustomPainter {
+  const _NoisePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rng = Random(42); // Fixed seed for consistent noise pattern
+    final paint = Paint()..style = PaintingStyle.fill;
+    const step = 4.0;
+
+    for (double x = 0; x < size.width; x += step) {
+      for (double y = 0; y < size.height; y += step) {
+        final gray = rng.nextInt(256);
+        paint.color = Color.fromARGB(rng.nextInt(60), gray, gray, gray);
+        canvas.drawRect(Rect.fromLTWH(x, y, step, step), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class CRTFilter extends StatelessWidget {

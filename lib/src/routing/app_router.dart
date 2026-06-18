@@ -9,14 +9,16 @@ import '../features/main/presentation/home_screen.dart';
 
 part 'app_router.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 GoRouter appRouter(AppRouterRef ref) {
-  final authState = ref.watch(authStateChangesProvider);
-  final activeCharacter = ref.watch(activeCharacterProvider);
-
-  return GoRouter(
+  // O router é mantido vivo (keepAlive) para não ser recriado a cada mudança de estado.
+  // ref.listen + router.refresh() dispara apenas o redirect, sem recriar o GoRouter.
+  final router = GoRouter(
     initialLocation: '/login',
     redirect: (context, state) {
+      final authState = ref.read(authStateChangesProvider);
+      final activeCharacter = ref.read(activeCharacterProvider);
+
       final isLoggedIn = authState.value != null;
       final isLoggingIn = state.matchedLocation == '/login';
 
@@ -35,8 +37,8 @@ GoRouter appRouter(AppRouterRef ref) {
       }
 
       // Se tem agente e campanha, mas está em telas de seleção ou login
-      if (isLoggingIn || 
-          state.matchedLocation == '/select-agent' || 
+      if (isLoggingIn ||
+          state.matchedLocation == '/select-agent' ||
           state.matchedLocation == '/select-campaign') {
         return '/home';
       }
@@ -62,4 +64,13 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
     ],
   );
+
+  // Dispara refresh no router quando auth ou personagem mudar —
+  // sem recriar o objeto GoRouter.
+  ref.listen(authStateChangesProvider, (_, _) => router.refresh());
+  ref.listen(activeCharacterProvider, (_, _) => router.refresh());
+
+  ref.onDispose(router.dispose);
+
+  return router;
 }

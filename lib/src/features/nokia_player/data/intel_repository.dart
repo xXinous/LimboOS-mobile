@@ -17,14 +17,14 @@ class IntelRepository {
         .collection('characters')
         .doc(characterId)
         .collection('intel')
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
   }
 
   Stream<List<IntelItem>> watchAllMediaAssets() {
     return _firestore
         .collection('mediaAssets')
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .map((snapshot) =>
             snapshot.docs.map((doc) => IntelItem.fromFirestore(doc)).toList());
   }

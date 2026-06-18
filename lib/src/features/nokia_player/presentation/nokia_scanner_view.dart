@@ -50,14 +50,11 @@ class _NokiaScannerViewState extends ConsumerState<NokiaScannerView> {
         return;
       }
 
-      // Step 1: Check redirects
+      // Step 1: Check redirects (resolves alias → real intel ID)
       final redirectedId = await repo.resolveQrCode(code);
       final finalCode = redirectedId ?? code;
 
-      // Step 2: Query Firestore check if it's a valid mediaAsset
-      await repo.resolveQrCode(finalCode); // checking exists in redirects, or we can just try to unlock it directly
-      
-      // Unlock the item in the user dossier
+      // Step 2: Unlock the item in the user dossier
       await repo.unlockIntel(
         uid: auth.uid,
         characterId: character.id,

@@ -33,13 +33,16 @@ dependencies:
   flutter_animate: ^4.5.2
   google_fonts: ^6.2.1
   flutter_lucide: ^1.1.0
-  font_awesome_flutter: ^10.8.0
+
 
   # Nokia Player Dependencies
   just_audio: ^0.9.42
   mobile_scanner: ^6.0.0
   battery_plus: ^6.1.0
   flutter_native_splash: ^2.4.4
+
+  # Image Cache
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

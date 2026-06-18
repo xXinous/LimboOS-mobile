@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:battery_plus/battery_plus.dart';
+import '../nokia_theme.dart';
 import '../data/nokia_providers.dart';
 
 class NokiaStatusBar extends ConsumerStatefulWidget {
@@ -24,7 +25,8 @@ class _NokiaStatusBarState extends ConsumerState<NokiaStatusBar> {
     super.initState();
     _updateTime();
     _getBatteryLevel();
-    _clockTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    // 60s é suficiente: o relógio exibe apenas HH:MM
+    _clockTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       _updateTime();
     });
 
@@ -37,9 +39,13 @@ class _NokiaStatusBarState extends ConsumerState<NokiaStatusBar> {
     final now = DateTime.now();
     final hour = now.hour.toString().padLeft(2, '0');
     final minute = now.minute.toString().padLeft(2, '0');
-    setState(() {
-      _timeStr = '$hour:$minute';
-    });
+    final newTimeStr = '$hour:$minute';
+    // Evita rebuild desnecessário se o minuto não mudou
+    if (newTimeStr != _timeStr) {
+      setState(() {
+        _timeStr = newTimeStr;
+      });
+    }
   }
 
   Future<void> _getBatteryLevel() async {
@@ -69,17 +75,17 @@ class _NokiaStatusBarState extends ConsumerState<NokiaStatusBar> {
     final textStyle = GoogleFonts.vt323(
       fontSize: 14,
       fontWeight: FontWeight.bold,
-      color: const Color(0xFF111E14),
+      color: NokiaTheme.kBlackInk,
       height: 1.0,
     );
 
     return Container(
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: const BoxDecoration(
-        color: Color(0xFFEDFEED),
+      decoration: BoxDecoration(
+        color: NokiaTheme.kGreenLcd,
         border: Border(
-          bottom: BorderSide(color: Color(0xFF111E14), width: 1),
+          bottom: BorderSide(color: NokiaTheme.kBlackInk, width: 1),
         ),
       ),
       child: Row(
